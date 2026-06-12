@@ -2,6 +2,8 @@ package solo.EducationApp.service;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import solo.EducationApp.dto.request.user.UserCreationRequest;
 import solo.EducationApp.dto.request.user.UserUpdateRequest;
@@ -15,13 +17,13 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-
     public User createUser(UserCreationRequest request) {
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
         User user = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
-                .password(request.getPassword())
+                .password(passwordEncoder.encode(request.getPassword()))
                 .email(request.getEmail())
                 .username(request.getUsername())
                 .build();
@@ -29,20 +31,17 @@ public class UserService {
         return userRepository.save(user);
     }
 
-
     public User updateUser(UserUpdateRequest request, String username) {
-
         User user = getUser(username);
-        if (user == null) {
-            throw new RuntimeException("User does not exist");
-        }
-        else {
-            user.setFirstName(request.getFirstName());
-            user.setLastName(request.getLastName());
-            user.setPassword(request.getPassword());
-            user.setEmail(request.getEmail());
-            return userRepository.save(user);
-        }
+        if (user == null) throw new RuntimeException("User does not exist");
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setEmail(request.getEmail());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        return userRepository.save(user);
+
     }
 
     public List<User> getAllUsers() {

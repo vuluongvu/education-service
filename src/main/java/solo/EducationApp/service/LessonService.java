@@ -33,9 +33,9 @@ public class LessonService {
                 .orElseThrow(() -> new RuntimeException("Lesson does not exist"));
     }
 
-    public Lesson updateLesson (int id, LessonUpdateRequest request) {
-        Lesson lesson = getLesson(id);
-        String lessonName = request.getLessonName().trim().replaceAll(" ", "-");
+    public Lesson updateLesson (String lessonName, LessonUpdateRequest request) {
+        Lesson lesson = getLessonByName(lessonName);
+        String lessonNameCleaned = request.getLessonName().trim().replaceAll(" ", "-");
 
         lesson.setLessonName(lessonName);
         lesson.setLessonPrice(request.getLessonPrice());
@@ -44,8 +44,8 @@ public class LessonService {
         return lessonRepository.save(lesson);
     }
 
-    public void deleteLesson(int id) {
-        Lesson lesson = getLesson(id);
+    public void deleteLesson(String lessonName) {
+        Lesson lesson = getLessonByName(lessonName);
         lessonRepository.delete(lesson);
     }
 

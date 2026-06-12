@@ -26,19 +26,15 @@ public class LessonController {
         return lessonService.getLessons();
     }
 
-    @GetMapping("/{id}")
-    public Lesson getLessonById(@PathVariable int id) {
-        return lessonService.getLesson(id);
+
+    @PutMapping("/{lessonName}")
+    public  Lesson updateLesson(@PathVariable String lessonName, @RequestBody @Valid LessonUpdateRequest request) {
+        return lessonService.updateLesson(lessonName, request);
     }
 
-    @PutMapping("/{id}")
-    public  Lesson updateLesson(@PathVariable int id, @RequestBody @Valid LessonUpdateRequest request) {
-        return lessonService.updateLesson(id, request);
-    }
-
-    @DeleteMapping("/{id}")
-    public void deleteLesson(@PathVariable int id) {
-        lessonService.deleteLesson(id);
+    @DeleteMapping("/{lessonName}")
+    public void deleteLesson(@PathVariable String lessonName) {
+        lessonService.deleteLesson(lessonName);
     }
 
     @GetMapping("/{lessonName}")

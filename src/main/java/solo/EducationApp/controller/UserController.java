@@ -1,9 +1,11 @@
 package solo.EducationApp.controller;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
 import solo.EducationApp.dto.request.user.UserUpdateRequest;
 import solo.EducationApp.entity.User;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import solo.EducationApp.dto.request.user.UserCreationRequest;
 import solo.EducationApp.dto.response.ApiResponse;
 import solo.EducationApp.service.UserService;
@@ -12,10 +14,12 @@ import java.util.List;
 
 
 @RestController
+@RequestMapping("/users")
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PUBLIC)
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     @PostMapping
     ApiResponse<User> createUser(@RequestBody @Valid UserCreationRequest request) {
@@ -47,16 +51,11 @@ public class UserController {
 
     @DeleteMapping("/{username}")
     ApiResponse<String> deleteUser(@PathVariable String username) {
-        if (getUser(username) == null) {
-            throw new RuntimeException("User does not exist");
-        }
-
-       else {
-            ApiResponse<String> apiResponse = new ApiResponse<>();
-            apiResponse.setMessage("User deleted successfully");
-            userService.deleteUser(username);
-            return apiResponse;
-        }
+        userService.deleteUser(username);
+        ApiResponse<String> apiResponse = new ApiResponse<>();
+        apiResponse.setMessage("User deleted successfully");
+        return apiResponse;
     }
+
 
 }
