@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import solo.EducationApp.dto.request.user.UserCreationRequest;
 import solo.EducationApp.dto.request.user.UserUpdateRequest;
 import solo.EducationApp.entity.User;
+import solo.EducationApp.exception.AppException;
+import solo.EducationApp.exception.ErrorCode;
 import solo.EducationApp.repository.UserRepository;
 
 import java.util.List;
@@ -32,8 +34,8 @@ public class UserService {
     }
 
     public User updateUser(UserUpdateRequest request, String username) {
-        User user = getUser(username);
-        if (user == null) throw new RuntimeException("User does not exist");
+        var user = getUser(username);
+
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
         user.setFirstName(request.getFirstName());
@@ -41,7 +43,6 @@ public class UserService {
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         return userRepository.save(user);
-
     }
 
     public List<User> getAllUsers() {
@@ -49,13 +50,12 @@ public class UserService {
     }
 
     public User getUser(String username) {
-        return userRepository.findByUsername(username);
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
     }
 
     public void deleteUser(String username) {
-        if (getUser(username) != null) {
-            User user = getUser(username);
-            userRepository.delete(user);
+        var user = getUser(username);
+        userRepository.delete(user);
         }
-    }
 }

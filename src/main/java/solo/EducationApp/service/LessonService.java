@@ -13,10 +13,14 @@ public class LessonService {
     @Autowired
     LessonRepository lessonRepository;
 
+    public String getSlug(String lessonName) {
+        return lessonName.trim().replaceAll(" ", "-").toLowerCase();
+    }
+
     public Lesson createLesson(LessonCreationRequest request) {
-        String lessonName = request.getLessonName().trim().replaceAll(" ", "-");
         Lesson lesson = Lesson.builder()
-                .lessonName(lessonName)
+                .lessonName(request.getLessonName())
+                .lessonSlug(getSlug(request.getLessonName()))
                 .lessonPrice(request.getLessonPrice())
                 .lessonQuantity(request.getLessonQuantity())
                 .lessonDescription(request.getLessonDescription())
@@ -34,13 +38,13 @@ public class LessonService {
     }
 
     public Lesson updateLesson (String lessonName, LessonUpdateRequest request) {
-        Lesson lesson = getLessonByName(lessonName);
-        String lessonNameCleaned = request.getLessonName().trim().replaceAll(" ", "-");
-
-        lesson.setLessonName(lessonName);
-        lesson.setLessonPrice(request.getLessonPrice());
-        lesson.setLessonQuantity(request.getLessonQuantity());
-        lesson.setLessonDescription(request.getLessonDescription());
+        Lesson lesson = Lesson.builder()
+                .lessonName(lessonName)
+                .lessonSlug(getSlug(lessonName))
+                .lessonPrice(request.getLessonPrice())
+                .lessonQuantity(request.getLessonQuantity())
+                .lessonDescription(request.getLessonDescription())
+                .build();
         return lessonRepository.save(lesson);
     }
 
@@ -50,6 +54,7 @@ public class LessonService {
     }
 
     public Lesson getLessonByName(String lessonName) {
-        return lessonRepository.findByLessonName(lessonName);
+        return lessonRepository.findByLessonName(lessonName)
+                .orElseThrow(() -> new RuntimeException("Lesson does not exist"));
     }
 }

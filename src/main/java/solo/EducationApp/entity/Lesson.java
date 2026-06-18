@@ -19,6 +19,8 @@ public class Lesson {
     @NotBlank
     private String lessonName;
     @NotBlank
+    private String lessonSlug;
+    @NotBlank
     private double lessonPrice;
     @NotBlank
     private int lessonQuantity;

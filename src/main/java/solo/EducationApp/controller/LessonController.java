@@ -20,7 +20,6 @@ public class LessonController {
         return lessonService.createLesson(request);
     }
 
-
     @GetMapping
     List<Lesson> getAllLessons() {
         return lessonService.getLessons();

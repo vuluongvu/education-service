@@ -20,13 +20,10 @@ class AuthenticationController {
 
     @PostMapping("/log-in")
     ApiResponse<AuthenticationResponse> loginAuthentication(@RequestBody AuthenticationRequest request) {
-        boolean result = authenticationService.authenticate(request.getUsername(), request.getPassword());
+        var result = authenticationService.authenticate(request);
 
-        AuthenticationResponse authenticationResponse = AuthenticationResponse.builder()
-                .authenticated(result)
-                .build();
         return ApiResponse.<AuthenticationResponse>builder()
-                .result(authenticationResponse)
+                .result(result)
                 .message("Authentication successful")
                 .statusCode(1001)
                 .build();
