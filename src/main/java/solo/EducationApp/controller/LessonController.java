@@ -25,7 +25,6 @@ public class LessonController {
         return lessonService.getLessons();
     }
 
-
     @PutMapping("/{lessonName}")
     public  Lesson updateLesson(@PathVariable String lessonName, @RequestBody @Valid LessonUpdateRequest request) {
         return lessonService.updateLesson(lessonName, request);

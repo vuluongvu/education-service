@@ -1,20 +1,26 @@
 package solo.EducationApp.service;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import solo.EducationApp.dto.request.Authentication.AuthenticationRequest;
+import solo.EducationApp.dto.request.VerifyTokenRequest.IntrospectRequest;
 import solo.EducationApp.dto.response.AuthenticationResponse;
+import solo.EducationApp.dto.response.IntrospectResponse;
 import solo.EducationApp.exception.AppException;
 import solo.EducationApp.exception.ErrorCode;
 import solo.EducationApp.repository.UserRepository;
+
+import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -27,8 +33,26 @@ public class AuthenticationService {
     private UserRepository userRepository;
 
     @NonFinal
-    protected static final String SIGNER_KEY = "a23eba281a3b03b0216dbf6a2793b856c01b18ceca4c185dccffd2f030da81c7";
-    // todo
+    @Value("${jwt.signerKey}")
+    protected String SIGNER_KEY;
+
+    public IntrospectResponse introspect(IntrospectRequest request)
+            throws  JOSEException, ParseException {
+
+        var token = request.getToken();
+
+        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+        SignedJWT signedJWT = SignedJWT.parse(token);
+
+        Date expirationTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+        var verified = signedJWT.verify(verifier);
+
+        return IntrospectResponse.builder()
+                .valid(verified && expirationTime.after(new Date()))
+                .build();
+    }
+
 
      public AuthenticationResponse authenticate(AuthenticationRequest request) {
          var user = userRepository.findByUsername(request.getUsername())
@@ -37,8 +61,7 @@ public class AuthenticationService {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         boolean authenticated =  passwordEncoder.matches(request.getPassword(), user.getPassword());
 
-        if (!authenticated)
-            throw  new UsernameNotFoundException("Invalid username or password");
+        if (!authenticated) throw  new AppException(ErrorCode.INVALID_PASSWORD);
 
         var token = generateToken(request.getUsername());
         return AuthenticationResponse.builder()
@@ -55,11 +78,7 @@ public class AuthenticationService {
                 .subject(username)
                 .issuer("luongvanvu.com")
                 .issueTime(new Date(System.currentTimeMillis()))
-                .expirationTime(
-                        new Date(
-                                Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()
-                        )
-                )
+                .expirationTime(new Date(Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()))
                 .claim("custom claim", "custom value")
                 .build();
 

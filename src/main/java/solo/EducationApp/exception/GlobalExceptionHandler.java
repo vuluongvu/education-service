@@ -24,7 +24,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = AppException.class)
     ResponseEntity<ApiResponse> handleAppException(HttpServletRequest request, AppException e) {
         log.error("Exception: ", e);
-        ErrorCode errorCode = e.getErrorCode(); // ← lấy từ exception, không hardcode!
+        ErrorCode errorCode = e.getErrorCode(); // lấy từ exception không hardcode
         ApiResponse apiResponse = new ApiResponse();
         apiResponse.setStatusCode(errorCode.getCode());
         apiResponse.setMessage(errorCode.getMessage());

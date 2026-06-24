@@ -9,6 +9,7 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
-
+jwt:
+  signerKey: ${SIGNER_KEY}
 kind: Application
 
